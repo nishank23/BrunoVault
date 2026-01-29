@@ -1,33 +1,27 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import BrunoSvgLogo from './assets/BrunoVaultLogo.svg?react'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div style={{height:'100%',minHeight:'100vh' ,display:'flex',flexDirection:'column',justifyContent:'',}}>
+      <div style={ {display:'flex', flexDirection:'row',alignItems:'center', gap:'15px',marginLeft:'0px'} }>
+        <BrunoSvgLogo style={{ width: '40px', height: '40px',}} />
+        <h1>Bruno Vault</h1>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+    <div style={{flexGrow:1,display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'flex-start'}}>
+      <h1 style={{fontSize:'44px',margin:'0px',marginLeft:'10px'}}>Welcome to Bruno Vault!</h1>
+      <p style={{marginLeft:'10px'}}>Import or Generate Seed Phrase for your Solana and Ethereum wallet.</p>
+
+      <button style={{marginLeft:'10px',marginTop:'10px', padding:'10px', fontSize:'16px', cursor:'pointer'}}>Get Started</button>
+       </div>
+       
+       <div>
+        <p style={{fontSize:'12px', color:'gray', marginLeft:'10px'}}>© 2024 Bruno Vault. All rights reserved.</p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    </div>
+   
     </>
   )
 }
