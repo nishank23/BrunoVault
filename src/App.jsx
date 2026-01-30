@@ -36,10 +36,10 @@ function App() {
     }
     const onGenerateSeedClick = () => {
         setUserState('GENERATE_SEED')
-        const mnemonic2 = bip39.generateMnemonic()
-        setMnemonic(mnemonic2)
-        const seedPhrase = bip39.mnemonicToSeedSync(mnemonic2).toString('hex')
-        setUserState('WALLET_CHOICE')
+
+        setMnemonic(bip39.generateMnemonic().split(' '))
+
+        const seedPhrase = bip39.mnemonicToSeedSync(mnemonic).toString('hex')
 
         console.log('Generate Seed clicked, userState set to ' + seedPhrase)
     }
@@ -176,14 +176,20 @@ function App() {
                 justifyContent: 'center',
                 alignItems: 'flex-start'
             }}>
-                <h1 style={{fontSize: '44px', margin: '0px', marginLeft: '10px'}}>Import your Recovery
+                <h1 style={{fontSize: '44px', margin: '0px', marginLeft: '10px'}}>Save your Recovery
                     Phrase</h1>
-                <p style={{marginLeft: '10px'}}>Enter your 12-word seed phrase below:</p>
+                <p style={{marginLeft: '10px'}}>We never store your seed phrase:</p>
                 <div style={{
                     marginLeft: '10px', display: 'grid', gridTemplateColumns: 'auto auto auto', gap: '10px'
                 }}>
                     {mnemonic.map((word, index) => (
-                        <textarea key={index} style={{padding: '6px', width: '120px'}} type="text"
+                        <textarea key={index} style={{
+
+                            fontFamily: 'sans-serif',
+                            fontSize: '16px',
+                            textAlign: 'center',
+                            alignContent: 'center',
+                            width: '120px',pointerEvents:'none'}} type="text"
                                id={`seed${index + 1}`} name={`seed${index + 1}`} value={word}
 
                         />))}
