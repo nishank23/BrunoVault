@@ -2,14 +2,88 @@ import {useState} from 'react'
 import './App.css'
 import BrunoSvgLogo from './assets/BrunoVaultLogo.svg?react'
 import * as bip39 from 'bip39'
+import {derivePath} from "ed25519-hd-key";
+import nacl from "tweetnacl";
+import {Keypair as KeyPair} from "@solana/web3.js";
+import bs58 from "bs58";
+import {Wallet} from "ethers";
+
 
 function App() {
-    const [userState, setUserState] = useState('WELCOME')
+    const [userState, setUserState] = useState('WALLET_READY')
 
     const [mnemonic, setMnemonic] = useState(Array.from({length: 12}).fill(''));
 
 
     const [isValidSeed, setIsValidSeed] = useState(false)
+
+    const [walletList, setWalletList] = useState([])
+
+
+    const generateWalletFromMnemonic = (
+        pathType,
+        mnemonic,
+        accountIndex,
+    ) => {
+        try {
+            console.log(mnemonic.join(' '));
+            const seedBuffer = bip39.mnemonicToSeedSync(mnemonic.join(' '))
+            const derivationpath = `m/44'/${pathType}'/0'/${accountIndex}'`
+            console.log(derivationpath)
+            const derivedSeed = derivePath(derivationpath, seedBuffer.toString('hex')).key
+
+            let publicKey;
+            let privateKey;
+            console.log("pathType", pathType)
+            if (pathType === "501") {
+                //Solana
+                const secretKey = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
+                const keyPair = KeyPair.fromSecretKey(secretKey)
+                publicKey = keyPair.publicKey.toBase58()
+                privateKey = bs58.encode(secretKey)
+
+
+            } else if (pathType === "60") {
+                //Ethereum
+                privateKey = Buffer.from(derivedSeed).toString('hex')
+                publicKey =new Wallet(privateKey).address
+
+
+            } else {
+                alert("Invalid path type")
+
+            }
+            return {
+                publicKey,
+                privateKey,
+                mnemonic,
+                derivationpath
+            };
+
+        } catch (err) {
+            console.error(err)
+        }
+
+
+
+    }
+    const onEthereumClick = () => {
+
+        let wallet = generateWalletFromMnemonic("60", mnemonic, 0)
+        console.log('Ethereum clicked, userState set to '+wallet.publicKey+wallet.privateKey)
+
+
+        setWalletList(...walletList, wallet)
+
+    }
+    const onSolanaClick = () => {
+
+        let wallet = generateWalletFromMnemonic("501", mnemonic, 0)
+        setWalletList(...walletList, wallet)
+        console.log('Ethereum clicked, userState set to '+wallet.publicKey+wallet.privateKey)
+
+        // setUserState('WALLET_READY')
+    }
 
 
     const onPasteCheck = (e) => {
@@ -36,12 +110,8 @@ function App() {
     }
     const onGenerateSeedClick = () => {
         setUserState('GENERATE_SEED')
-
-        setMnemonic(bip39.generateMnemonic().split(' '))
-
-        const seedPhrase = bip39.mnemonicToSeedSync(mnemonic).toString('hex')
-
-        console.log('Generate Seed clicked, userState set to ' + seedPhrase)
+        let mnemonic = bip39.generateMnemonic().split(' ')
+        setMnemonic(mnemonic)
     }
     const onValidateSeed = () => {
 
@@ -49,8 +119,6 @@ function App() {
 
         if (mnemonic.every(word => word.toString().trim() !== '') && bip39.validateMnemonic(mnemonic2)) {
             setIsValidSeed(true)
-            const seedPhrase = bip39.mnemonicToSeedSync(mnemonic2).toString('hex')
-            console.log(seedPhrase)
             setUserState('WALLET_CHOICE')
 
         } else {
@@ -62,15 +130,12 @@ function App() {
         setUserState('WELCOME')
         console.log('Back clicked, userState set to ' + userState)
     }
-    const onEthereumClick = () => {
-        setUserState('WALLET_READY')
-    }
-    const onSolanaClick = () =>{
-        setUserState('WALLET_READY')
-    }
 
 
-    return (<div style={{
+    return (
+
+
+        <div style={{
             height: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: '',
         }}>
             <div style={{
@@ -183,14 +248,17 @@ function App() {
                     marginLeft: '10px', display: 'grid', gridTemplateColumns: 'auto auto auto', gap: '10px'
                 }}>
                     {mnemonic.map((word, index) => (
-                        <textarea key={index} style={{
-
+                        <textarea style={{
+                            resize: 'none',
                             fontFamily: 'sans-serif',
                             fontSize: '16px',
                             textAlign: 'center',
                             alignContent: 'center',
-                            width: '120px',pointerEvents:'none'}} type="text"
-                               id={`seed${index + 1}`} name={`seed${index + 1}`} value={word}
+                            width: '120px', pointerEvents: 'none'
+                        }}
+                                  readOnly={true}
+                                  key={index} value={word}
+
 
                         />))}
                 </div>
@@ -201,7 +269,7 @@ function App() {
                         marginTop: '20px',
                         padding: '10px',
                         fontSize: '16px',
-                        cursor: isValidSeed ? 'pointer' : 'auto'
+                        cursor: 'pointer'
                     }}
                     onClick={onValidateSeed}>Continue
                 </button>
@@ -253,9 +321,18 @@ function App() {
                 flexGrow: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
+                justifyContent: '',
                 alignItems: 'flex-start'
             }}>
+
+                <h1 style={{fontSize: '60px', margin: '0px 0px 0px 10px'}}>Your Wallet is ready</h1>
+                <h1 style={{fontSize: '44px', margin: '0px 0px 0px 10px'}}>Solana</h1>
+                <h1 style={{fontSize: '44px', margin: '0px 0px 0px 10px'}}></h1>
+                <p style={{marginLeft: '10px', marginTop: '0px'}}></p>
+
+
+
+
 
 
             </div>}
